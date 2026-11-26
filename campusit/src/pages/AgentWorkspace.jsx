@@ -10,7 +10,6 @@ import { AiBadge, Chip, PriorityBadge, StatusBadge } from "@/components/Badges";
 import { Sla, SlaBar } from "@/components/Sla";
 import { Metrics } from "@/components/Metrics";
 import Lifecycle from "@/components/Lifecycle";
-import MaintenanceEditor from "@/components/MaintenanceEditor";
 import AiPanel from "@/components/AiPanel";
 import { IMP, M, RT, URG } from "@/lib/data";
 import { useApp } from "@/store";
@@ -99,9 +98,7 @@ function TicketPanel({ t }) {
             <div><div className="text-xs text-mu">Location</div>{t.loc}</div>
             <div><div className="text-xs text-mu">Contact</div>g••••••@student.edu <Chip c="#16A34A">PII Protected</Chip></div>
           </div>
-          {t.assetId && <div className="rounded-lg border border-ac/40 bg-b2 p-3"><b>Equipment QR report</b><p>Asset: {t.assetId} · {t.assetType} · {t.loc}</p>{t.exam && <p className="text-wr">Exam/defense flag: validate academic urgency before applying priority exceptions.</p>}{t.parentId && <p>Related incident group: {t.parentId}</p>}</div>}
-          {t.assetId && <MaintenanceEditor ticket={t} />}
-          <p>{t.desc}</p>{!t.assetId && <p className="text-xs text-mu">Attachment: wifi-error.png</p>}
+          <p>{t.desc}</p><p className="text-xs text-mu">Attachment: wifi-error.png</p>
         </Body></TabsContent>
         <TabsContent value="c"><Body>{t.msgs.map((m, i) => <p key={i}><b>{m[0]}</b> <span className="text-xs text-mu">{m[1]}</span><br />{m[2]}</p>)}{!t.msgs.length && <p className="text-mu">No messages yet.</p>}</Body></TabsContent>
         <TabsContent value="n"><Body>
@@ -143,7 +140,7 @@ function SidePanel({ t }) {
           <div><Button size="sm" onClick={() => toggleElev(t.id)}>{t.elev ? "Clear" : "Flag"} elevated access</Button></div>
           {crit.some((c) => c[1]) && t.tier === "Tier 1" && <div><Chip c="#D97706">Escalation recommended</Chip></div>}
           <Button disabled={t.tier === "Tier 2" || res} onClick={() => escalate(t.id)}>Escalate to Tier 2</Button>
-          {tier2 && t.cat === "Account & Password" ? <Button onClick={() => { triggerRpa(t.id); nav("/rpa"); }}>Trigger simulated password RPA</Button> : <Button disabled title="Only Tier 2 and authorized account/password tickets may enter credential-reset RPA"><Lock className="size-3" />RPA only for eligible account tickets</Button>}
+          {tier2 ? <Button onClick={() => { triggerRpa(t.id); nav("/rpa"); }}>Trigger RPA bot</Button> : <Button disabled><Lock className="size-3" />RPA requires Tier 2</Button>}
           <Button variant="primary" disabled={res} onClick={() => resolve(t.id)}>{res ? "Resolved" : "Resolve & close"}</Button>
         </Body>
       </Section>
