@@ -23,6 +23,7 @@ export default function TrackTicket() {
           <div className="flex gap-1 overflow-x-auto">
             {STEPS.map((s, i) => <div key={s} className={cn("min-w-20 flex-1 border-t-2 pt-1.5 font-medium", i <= t.step ? "border-ac text-tx" : "border-bd text-mu")}>{s}</div>)}
           </div>
+          {t.assetId && <div className="rounded-lg border border-bd bg-b2 p-3"><b>QR equipment report</b><p className="text-mu">Asset: {t.assetId} · Type: {t.assetType || "Equipment"} · Location: {t.loc}</p><p className="text-xs text-mu">This ticket and its status also appear in the authorized IT agent queue.</p></div>}
           <div className="flex flex-wrap gap-x-8 gap-y-2">
             <div><div className="text-xs text-mu">Status</div><b>{t.st}</b></div>
             <div><div className="text-xs text-mu">Team</div><b>{t.tier} Support</b></div>

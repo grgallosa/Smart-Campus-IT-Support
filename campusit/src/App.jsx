@@ -17,6 +17,8 @@ import Rpa from "@/pages/Rpa";
 import Analytics from "@/pages/Analytics";
 import Security from "@/pages/Security";
 import UsersRoles from "@/pages/UsersRoles";
+import QrReport from "@/pages/QrReport";
+import Assets from "@/pages/Assets";
 
 function Layout() {
   const [open, setOpen] = useState(false);
@@ -51,6 +53,8 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={role === "s" ? <HelpCenter /> : <Navigate to="/agent" replace />} />
         <Route path="tickets" element={<Guard roles="s"><MyTickets /></Guard>} />
+        <Route path="report" element={<Guard roles="s"><QrReport /></Guard>} />
+        <Route path="assets" element={<Guard roles="tua"><Assets /></Guard>} />
         <Route path="tickets/:id" element={<Guard roles="s"><TrackTicket /></Guard>} />
         <Route path="agent/:id?" element={<Guard roles="tua"><AgentWorkspace /></Guard>} />
         <Route path="sla" element={<Guard roles="tua"><SlaMonitor /></Guard>} />

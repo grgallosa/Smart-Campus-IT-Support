@@ -43,7 +43,9 @@ export const SOL = [
 export const NAV = [
   { label: "Help Center", to: "/", icon: "LifeBuoy", roles: "s" },
   { label: "My Tickets", to: "/tickets", icon: "Ticket", roles: "s" },
+  { label: "Scan QR / Report", to: "/report", icon: "QrCode", roles: "s" },
   { label: "Agent Workspace", to: "/agent", icon: "Headset", roles: "tua", group: "Support" },
+  { label: "Equipment Assets", to: "/assets", icon: "Boxes", roles: "tua", group: "Support" },
   { label: "SLA Monitor", to: "/sla", icon: "Timer", roles: "tua", group: "Support" },
   { label: "RPA Workflows", to: "/rpa", icon: "Bot", roles: "ua", group: "Automation" },
   { label: "Analytics", to: "/analytics", icon: "BarChart3", roles: "tua", group: "Insights" },
@@ -95,7 +97,7 @@ export const seedAudit = [
   ["Student", "Opened Agent Workspace", "/agent", "10:49 AM", "Denied"],
 ];
 export const RPA_LOG0 = [
-  ["09:41", "Request received", "Ticket CIT-2026-1042"], ["09:42", "Identity validated", "Student record match"],
+  ["09:41", "Request received", "Ticket CIT-2026-1039"], ["09:42", "Identity validated", "Student record match"],
   ["09:42", "Account system accessed", "Read-only lookup"], ["09:43", "Credential reset completed", "Temporary credential issued"],
   ["09:43", "User notification sent", "Email to student"],
 ];

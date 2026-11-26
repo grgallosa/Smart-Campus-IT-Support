@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, QrCode } from "lucide-react";
 import { Link } from "react-router-dom";
 import ChatAssistant from "@/components/ChatAssistant";
 import TicketsTable from "@/components/TicketsTable";
@@ -28,6 +28,12 @@ export default function HelpCenter() {
           ))}
         </div>
       </div>
+      <Section title="Report laboratory equipment problem" action={<span className="text-xs text-mu">QR-linked asset reporting</span>}>
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+          <div><p className="font-semibold">Scan a QR label on a classroom PC, projector, or printer.</p><p className="text-xs text-mu">Asset and room details fill automatically; unresolved problems become IT tickets.</p></div>
+          <Link to="/report" className="inline-flex items-center gap-2 rounded-md bg-ac px-4 py-2 font-medium text-btt hover:bg-ach"><QrCode className="size-4" /> Scan QR / Report Issue</Link>
+        </div>
+      </Section>
       <ChatAssistant seed={seed} />
       <Section title="My tickets" action={<Link to="/tickets" className="text-acx hover:underline">View all</Link>}>
         <TicketsTable rows={mine} />
