@@ -15,7 +15,7 @@ export default function Security() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div><h1>Security</h1><p className="text-mu">Privacy and access controls under RA 10173 (Data Privacy Act).</p></div>
+        <div><h1>Security</h1><p className="text-mu">Demonstration of privacy safeguards and role-based access under RA 10173. This client-only prototype is not production authentication.</p></div>
         <div className="flex flex-wrap gap-2"><Chip c="#16A34A">PII Protected</Chip><Chip c="#2563EB">RBAC Enabled</Chip><Chip c="#2563EB">Access Logged</Chip></div>
       </div>
       <Section title="PII protection"><Metrics items={[["Email", "g••••••@student.edu"], ["Phone", "09•••••••21"], ["Student ID", "••••4821"]]} /></Section>
@@ -27,7 +27,7 @@ export default function Security() {
         <div className="overflow-x-auto"><table className="tbl"><thead><tr><th>User</th><th>Action</th><th>Resource</th><th>Time</th><th>Result</th></tr></thead>
           <tbody>{audit.slice(0, 12).map((a, i) => <tr key={i}><td>{a[0]}</td><td>{a[1]}</td><td className="text-mu">{a[2]}</td><td>{a[3]}</td><td className={a[4] === "Denied" ? "text-er" : "text-ok"}>{a[4]}</td></tr>)}</tbody></table></div>
       </Section>
-      <Section title="Login and activity history">
+      <Section title="Sample historical login records">
         <div className="overflow-x-auto"><table className="tbl"><thead><tr><th>User</th><th>Event</th><th>Device</th><th>Time</th><th>Result</th></tr></thead>
           <tbody>{LOGINS.map((a, i) => <tr key={i}><td>{a[0]}</td><td>{a[1]}</td><td className="text-mu">{a[2]}</td><td>{a[3]}</td><td className={a[4] === "Success" ? "text-ok" : "text-er"}>{a[4]}</td></tr>)}</tbody></table></div>
       </Section>

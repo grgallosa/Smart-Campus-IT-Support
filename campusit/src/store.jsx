@@ -1,16 +1,21 @@
 import { createContext, useContext, useRef, useState } from "react";
 import { MX, TOT, RT, clock, makeTicket, seedTickets, seedAudit, PERM0, USERS, RPA_LOG0 } from "@/lib/data";
+import { verifiedCampusRole, isStaffDemoAccount } from "@/lib/campusIdentity";
 
-export const U = { s: ["Gina Reyes", "Student"], t: ["Marco Santos", "Tier 1 Agent"], u: ["Rafael Cruz", "Tier 2 Agent"], a: ["Ana Lopez", "IT Administrator"] };
+export const U = { s: ["Gina Reyes", "Student"], f: ["Prof. D. Lim", "Faculty"], t: ["Marco Santos", "Tier 1 Agent"], u: ["Rafael Cruz", "Tier 2 Agent"], a: ["Ana Lopez", "IT Administrator"] };
+export const isRequester = (role) => role === "s" || role === "f";
+export const isAgent = (role) => ["t", "u", "a"].includes(role);
+const OWNERS = { s: "G. Reyes", f: "Prof. D. Lim" };
+export const ownsTicket = (role, ticket) => !!ticket && isRequester(role) && (ticket.ownerRole ? ticket.ownerRole === role : ticket.who === OWNERS[role]);
 const Ctx = createContext();
 export const useApp = () => useContext(Ctx);
 
 /** Single in-memory store (no backend). Every mutation also writes to the audit log. */
-export function AppProvider({ children, initialRole = "s" }) {
-  const [role, setRole] = useState(initialRole);
+export function AppProvider({ children, initialRole = null }) {
+  const [role, setRole] = useState(() => Object.hasOwn(U, initialRole) ? initialRole : null);
   const [maintenance, setMaintenance] = useState([]);
   const [tickets, setTickets] = useState(seedTickets);
-  const [notes, setNotes] = useState(["Welcome to CampusIT"]);
+  const [notes, setNotes] = useState(["Welcome to CampusCare AI"]);
   const [audit, setAudit] = useState(seedAudit);
   const [perm, setPerm] = useState(PERM0);
   const [users, setUsers] = useState(USERS);
@@ -22,18 +27,48 @@ export function AppProvider({ children, initialRole = "s" }) {
 
   const toast = (m) => { setMsg(m); clearTimeout(tm.current); tm.current = setTimeout(() => setMsg(""), 2400); };
   const log = (u, a, r, res = "Authorized") => setAudit((x) => [[u, a, r || "—", clock(), res], ...x]);
+  // Client-side demonstration only. Production must verify a signed campus session on the server.
+  const beginSession = (account, method) => {
+    if (!Object.hasOwn(U, account)) return false;
+    setRole(account); setGq(""); setMsg("");
+    log(U[account][0], method, U[account][1]);
+    return true;
+  };
+  const signInCampus = (token, confirmed) => {
+    const account = verifiedCampusRole(token, confirmed);
+    if (!account) { log("Unverified campus identity", "QR sign-in attempt", "Campus identity", "Denied"); return false; }
+    return beginSession(account, "Demo campus QR verified");
+  };
+  const signInStaff = (account) => {
+    if (!isStaffDemoAccount(account)) { log("Unverified staff identity", "Staff sign-in attempt", "Staff access", "Denied"); return false; }
+    return beginSession(account, "Demo staff sign in");
+  };
+  const recordCampusDenial = () => log("Unverified campus identity", "QR sign-in attempt", "Campus identity", "Denied");
+  const signOut = () => {
+    if (role) log(U[role][0], "Demo sign out", U[role][1]);
+    setRole(null); setGq(""); setMsg("");
+  };
+  const deny = (resource) => {
+    log(U[role]?.[0] || "Signed out", "Access attempt", resource, "Denied");
+    toast("Access restricted for this account");
+  };
+  const requireAgent = (resource) => {
+    if (isAgent(role)) return true;
+    deny(resource); return false;
+  };
   const notify = (m) => setNotes((n) => [m, ...n]);
   const get = (id) => tickets.find((t) => t.id === id);
   const upd = (id, fn) => setTickets((ts) => ts.map((t) => (t.id === id ? fn({ ...t, act: [...t.act], msgs: [...t.msgs], notes: [...t.notes] }) : t)));
   const A = (t, x) => { t.act.push([clock(), x]); return t; };
 
   const createTicket = (f) => {
+    if (!isRequester(role)) { deny("Create ticket"); return null; }
     const p = MX[f.imp][f.urg], hi = p < 3;
     const t = makeTicket({
-      id: 1043 + seq.current++, who: "G. Reyes", issue: f.subject || "IT support request", imp: f.imp, urg: f.urg,
+      id: 1043 + seq.current++, who: OWNERS[role], issue: f.subject || "IT support request", imp: f.imp, urg: f.urg,
       st: "Assigned", ago: 0, as: hi ? "Tier 2 queue" : "Tier 1 queue", tier: hi ? "Tier 2" : "Tier 1", cat: f.cat, step: 1,
       desc: f.desc || f.subject, loc: f.loc,
-      extra: { assetId: f.assetId || null, assetType: f.assetType || null, source: f.source || "Help Center", exam: !!f.exam },
+      extra: { ownerRole: role, assetId: f.assetId || null, assetType: f.assetType || null, source: f.source || "Help Center", exam: !!f.exam },
       act: [[clock(), f.assetId ? `QR report received for ${f.assetId}` : "Ticket created"], [clock(), `Triaged as P${p} (impact × urgency)`], [clock(), "Auto-routed to " + (hi ? "Tier 2" : "Tier 1")]],
     });
     if (f.assetId) {
@@ -44,12 +79,13 @@ export function AppProvider({ children, initialRole = "s" }) {
         t.act.push([clock(), `Related incident group: ${parent} (3+ reports within 10 min)`]);
       }
     }
-    setTickets((ts) => [t, ...ts]); notify((f.assetId ? `New equipment incident ${f.assetId}: ` : "Ticket #") + t.id + " created"); log("Student", "Submitted ticket", t.id); toast("Ticket " + t.id + " created");
+    setTickets((ts) => [t, ...ts]); notify((f.assetId ? `New equipment incident ${f.assetId}: ` : "Ticket #") + t.id + " created"); log(U[role][0], "Submitted ticket", t.id); toast("Ticket " + t.id + " created");
     return t;
   };
 
   /** Priority comes from Impact × Urgency. Re-rating restarts SLA from creation; P1/P2 auto-route to Tier 2. */
   const rerate = (id, imp, urg) => {
+    if (!requireAgent(id) || !get(id)) return;
     const t = get(id), np = MX[imp][urg], o = t.p, route = np !== o && np < 3 && t.tier === "Tier 1";
     upd(id, (x) => {
       x.imp = imp; x.urg = urg;
@@ -65,8 +101,8 @@ export function AppProvider({ children, initialRole = "s" }) {
     if (route) { notify(`#${id} re-rated P${np} and routed to Tier 2`); toast(`Re-rated P${np} · routed to Tier 2`); } else toast("Re-rated to P" + np);
   };
 
-  const studentReply = (id, text) => { upd(id, (t) => { t.msgs.push([U.s[0], clock(), text]); return t; }); toast("Reply sent"); };
-  const acceptAi = (id, text) => {
+  const studentReply = (id, text) => { if (!ownsTicket(role, get(id))) return deny(id); upd(id, (t) => { t.msgs.push([U[role][0], clock(), text]); return t; }); log(U[role][0], "Replied to own ticket", id); toast("Reply sent"); };
+  const acceptAi = (id, text) => { if (!requireAgent(id) || !get(id)) return;
     upd(id, (t) => {
       t.ai = "accepted"; t.resp = true; t.rep = text;
       if (["New", "Open", "Submitted", "Assigned"].includes(t.st)) t.st = "In Progress";
@@ -75,19 +111,19 @@ export function AppProvider({ children, initialRole = "s" }) {
     });
     notify("Update on #" + id + ": agent replied"); log("Agent", "Approved AI suggestion", id); toast("Reply sent to requester");
   };
-  const ignoreAi = (id) => { upd(id, (t) => { t.ai = "ignored"; return A(t, "Agent ignored AI suggestion"); }); log("Agent", "Ignored AI suggestion", id); toast("Suggestion ignored"); };
-  const addNote = (id, x) => { upd(id, (t) => { t.notes.push(x); return A(t, "Internal note added"); }); log("Agent", "Added internal note", id); };
-  const escalate = (id) => {
+  const ignoreAi = (id) => { if (!requireAgent(id) || !get(id)) return; upd(id, (t) => { t.ai = "ignored"; return A(t, "Agent ignored AI suggestion"); }); log("Agent", "Ignored AI suggestion", id); toast("Suggestion ignored"); };
+  const addNote = (id, x) => { if (!requireAgent(id) || !get(id)) return; upd(id, (t) => { t.notes.push(x); return A(t, "Internal note added"); }); log("Agent", "Added internal note", id); };
+  const escalate = (id) => { if (!requireAgent(id) || !get(id)) return;
     upd(id, (t) => { t.tier = "Tier 2"; t.as = "R. Cruz"; t.st = "Escalated"; return A(t, "Escalated to Tier 2 (priority unchanged)"); });
     notify(`#${id} escalated to Tier 2`); log("Agent", "Escalated to Tier 2", id); toast("Escalated to Tier 2");
   };
-  const toggleElev = (id) => upd(id, (t) => { t.elev = !t.elev; return t; });
-  const genSummary = (id) => upd(id, (t) => {
+  const toggleElev = (id) => { if (!requireAgent(id) || !get(id)) return; upd(id, (t) => { t.elev = !t.elev; return t; }); };
+  const genSummary = (id) => { if (!requireAgent(id) || !get(id)) return; upd(id, (t) => {
     t.sum = { issue: "Requester reported: " + t.issue + ".", tshoot: "Verified account and guided the user through reconnecting.", resolution: "Connection restored.", sentiment: "Neutral, positive after the fix", follow: "Monitor access point.", note: "Dorm B Wi-Fi auth issue, fixed by reconnecting. Watch for repeat reports.", saved: false };
     return t;
-  });
-  const saveSummary = (id, patch) => { upd(id, (t) => { t.sum = { ...t.sum, ...patch, saved: true }; return A(t, "AI summary saved"); }); log("Agent", "Saved summary", id); toast("Summary saved to ticket"); };
-  const resolve = (id) => {
+  }); };
+  const saveSummary = (id, patch) => { if (!requireAgent(id) || !get(id)) return; upd(id, (t) => { t.sum = { ...t.sum, ...patch, saved: true }; return A(t, "AI summary saved"); }); log("Agent", "Saved summary", id); toast("Summary saved to ticket"); };
+  const resolve = (id) => { if (!requireAgent(id) || !get(id)) return;
     upd(id, (t) => { t.st = "Resolved"; t.step = 3; return A(t, "Resolved and closed"); });
     notify(`Your ticket #${id} was resolved. A summary was sent to your email.`); log("Agent", "Resolved ticket", id); toast("Ticket resolved · requester notified");
   };
@@ -95,13 +131,13 @@ export function AppProvider({ children, initialRole = "s" }) {
   /* Simulated RPA bot (rules-based, no real systems touched). */
   const triggerRpa = (id) => {
     const ticket = tickets.find((x) => x.id === id);
-    if (!"ua".includes(role) || ticket?.cat !== "Account & Password") {
+    if (!["u", "a"].includes(role) || ticket?.cat !== "Account & Password") {
       toast("Password reset RPA accepts authorized account tickets only"); return;
     }
     setRpaId(id); setRpa({ pct: 72, state: "Running", log: RPA_LOG0 }); };
   const runRpa = () => {
     const ticket = tickets.find((x) => x.id === rpaId);
-    if (!"ua".includes(role) || ticket?.cat !== "Account & Password") {
+    if (!["u", "a"].includes(role) || ticket?.cat !== "Account & Password") {
       toast("RPA blocked: select an eligible account ticket"); return;
     }
     const id = rpaId, n = Math.ceil((100 - rpa.pct) / 7);
@@ -116,7 +152,7 @@ export function AppProvider({ children, initialRole = "s" }) {
   /** Append a human-approved equipment service entry and update the associated ticket. */
   const recordMaintenance = (id, entry) => {
     const ticket = tickets.find((t) => t.id === id);
-    if (!ticket?.assetId || !"tua".includes(role)) return toast("Only an authorized technician can record asset work");
+    if (!ticket?.assetId || !isAgent(role)) return toast("Only an authorized technician can record asset work");
     const cost = Number(entry.cost);
     if (!Number.isFinite(cost) || cost < 0 || cost > 1000000) return toast("Enter a valid non-negative repair cost");
     const row = { ticketId: id, assetId: ticket.assetId, condition: entry.condition,
@@ -129,9 +165,9 @@ export function AppProvider({ children, initialRole = "s" }) {
     toast("Equipment history and ticket activity updated");
   };
 
-  const togglePerm = (i, j) => { setPerm((p) => p.map((r, a) => (a === i ? r.map((v, b) => (b === j ? (v ? 0 : 1) : v)) : r))); log("Admin", "Changed permission", `row ${i + 1} · col ${j + 1}`); toast("Permission updated"); };
-  const setUserRole = (i, r) => { setUsers((us) => us.map((u, a) => (a === i ? [u[0], u[1], r, u[3], u[4]] : u))); log("Admin", "Changed role", users[i][0] + " → " + r); toast("Role updated"); };
+  const togglePerm = (i, j) => { if (role !== "a") return deny("Permission matrix"); setPerm((p) => p.map((r, a) => (a === i ? r.map((v, b) => (b === j ? (v ? 0 : 1) : v)) : r))); log("Admin", "Changed permission", `row ${i + 1} · col ${j + 1}`); toast("Permission updated"); };
+  const setUserRole = (i, r) => { if (role !== "a") return deny("User management"); setUsers((us) => us.map((u, a) => (a === i ? [u[0], u[1], r, u[3], u[4]] : u))); log("Admin", "Changed role", users[i][0] + " → " + r); toast("Role updated"); };
 
-  const v = { role, setRole, tickets, maintenance, recordMaintenance, notes, audit, perm, users, rpa, rpaId, msg, gq, setGq, createTicket, rerate, studentReply, acceptAi, ignoreAi, addNote, escalate, toggleElev, genSummary, saveSummary, resolve, triggerRpa, runRpa, togglePerm, setUserRole };
+  const v = { role, signInCampus, signInStaff, recordCampusDenial, signOut, deny, tickets, maintenance, recordMaintenance, notes, audit, perm, users, rpa, rpaId, msg, gq, setGq, createTicket, rerate, studentReply, acceptAi, ignoreAi, addNote, escalate, toggleElev, genSummary, saveSummary, resolve, triggerRpa, runRpa, togglePerm, setUserRole };
   return <Ctx.Provider value={v}>{children}</Ctx.Provider>;
 }

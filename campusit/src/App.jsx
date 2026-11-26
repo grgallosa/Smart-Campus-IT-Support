@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { Lock } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import Toaster from "@/components/Toaster";
 import { Section, Body } from "@/components/ui/card";
-import { useApp } from "@/store";
+import { isRequester, useApp } from "@/store";
+import Login from "@/pages/Login";
 import { useLocal, useTheme } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import HelpCenter from "@/pages/HelpCenter";
@@ -39,23 +40,27 @@ function Layout() {
 
 /** RBAC route guard: roles are s (student), t (Tier 1), u (Tier 2), a (admin). */
 function Guard({ roles, children }) {
-  const { role } = useApp();
-  if (roles.includes(role)) return children;
+  const { role, deny } = useApp();
+  const { pathname } = useLocation();
+  const allowed = roles.includes(role);
+  useEffect(() => { if (!allowed) deny(pathname); }, [allowed, pathname, role]);
+  if (allowed) return children;
   return (
-    <Section title="Access restricted"><Body><p className="flex items-center gap-2 text-mu"><Lock className="size-4" />Your role can’t open this screen. Switch the demo role to see it.</p></Body></Section>
+    <Section title="Access restricted"><Body><p className="flex items-center gap-2 text-mu"><Lock className="size-4" />Your role can’t open this screen. Sign out and choose an authorized demo account.</p></Body></Section>
   );
 }
 
 export default function App() {
   const { role } = useApp();
+  if (!role) return <Login />;
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={role === "s" ? <HelpCenter /> : <Navigate to="/agent" replace />} />
-        <Route path="tickets" element={<Guard roles="s"><MyTickets /></Guard>} />
-        <Route path="report" element={<Guard roles="s"><QrReport /></Guard>} />
+        <Route index element={isRequester(role) ? <HelpCenter /> : <Navigate to="/agent" replace />} />
+        <Route path="tickets" element={<Guard roles="sf"><MyTickets /></Guard>} />
+        <Route path="report" element={<Guard roles="sf"><QrReport /></Guard>} />
         <Route path="assets" element={<Guard roles="tua"><Assets /></Guard>} />
-        <Route path="tickets/:id" element={<Guard roles="s"><TrackTicket /></Guard>} />
+        <Route path="tickets/:id" element={<Guard roles="sf"><TrackTicket /></Guard>} />
         <Route path="agent/:id?" element={<Guard roles="tua"><AgentWorkspace /></Guard>} />
         <Route path="sla" element={<Guard roles="tua"><SlaMonitor /></Guard>} />
         <Route path="rpa" element={<Guard roles="ua"><Rpa /></Guard>} />

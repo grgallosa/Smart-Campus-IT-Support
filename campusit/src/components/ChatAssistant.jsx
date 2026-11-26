@@ -28,7 +28,7 @@ export default function ChatAssistant({ seed }) {
   const send = () => { if (text.trim()) { ask(text.trim()); setText(""); } };
 
   return (
-    <Section title="CampusIT AI" action={<AiBadge />} className="border-l-2 border-l-ac">
+    <Section title="CampusCare AI" action={<AiBadge />} className="border-l-2 border-l-ac">
       <Body className="gap-3">
         <div className="max-w-xl self-start rounded-xl bg-b2 px-3 py-2">Hi! Describe your problem and I’ll help you find a solution.</div>
         {chat.map((m, i) => (
@@ -71,7 +71,7 @@ export default function ChatAssistant({ seed }) {
           <Button size="sm" onClick={() => { setDraft(""); setDone(null); setOut("esc"); }}>Create a ticket</Button>
         </div>
         <div className="flex gap-2">
-          <Input aria-label="Ask CampusIT AI" placeholder="Ask anything about campus IT..." value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
+          <Input aria-label="Ask CampusCare AI" placeholder="Ask anything about campus IT..." value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
           <Button variant="primary" onClick={send}>Send</Button>
         </div>
       </Body>

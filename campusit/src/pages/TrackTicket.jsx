@@ -1,20 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Section, Body } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriorityBadge } from "@/components/Badges";
 import { Sla } from "@/components/Sla";
-import { useApp } from "@/store";
+import { ownsTicket, useApp } from "@/store";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Submitted", "Assigned", "In Progress", "Resolved"];
 
 /** Student-facing tracking: status timeline, team, SLA, conversation and reply. */
 export default function TrackTicket() {
-  const { id } = useParams(), { tickets, studentReply } = useApp(), [text, setText] = useState("");
-  const t = tickets.find((x) => x.id === id);
-  if (!t) return <p className="text-mu">Ticket not found. <Link className="text-acx" to="/tickets">Back to my tickets</Link></p>;
+  const { id } = useParams(), { tickets, studentReply, role, deny } = useApp(), [text, setText] = useState("");
+  const t = tickets.find((x) => x.id === id && ownsTicket(role, x));
+  useEffect(() => { if (!t) deny("Ticket " + id); }, [id, role, !!t]);
+  if (!t) return <p className="text-mu">Ticket unavailable or access restricted. <Link className="text-acx" to="/tickets">Back to my tickets</Link></p>;
   const last = t.msgs.length ? t.msgs[t.msgs.length - 1][2] : "We’ve received your ticket.";
   return (
     <>

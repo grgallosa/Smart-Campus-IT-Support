@@ -41,9 +41,9 @@ export const SOL = [
 
 /* ---------- Navigation (roles: s student, t Tier 1, u Tier 2, a admin) ---------- */
 export const NAV = [
-  { label: "Help Center", to: "/", icon: "LifeBuoy", roles: "s" },
-  { label: "My Tickets", to: "/tickets", icon: "Ticket", roles: "s" },
-  { label: "Scan QR / Report", to: "/report", icon: "QrCode", roles: "s" },
+  { label: "Help Center", to: "/", icon: "LifeBuoy", roles: "sf" },
+  { label: "My Tickets", to: "/tickets", icon: "Ticket", roles: "sf" },
+  { label: "Scan QR / Report", to: "/report", icon: "QrCode", roles: "sf" },
   { label: "Agent Workspace", to: "/agent", icon: "Headset", roles: "tua", group: "Support" },
   { label: "Equipment Assets", to: "/assets", icon: "Boxes", roles: "tua", group: "Support" },
   { label: "SLA Monitor", to: "/sla", icon: "Timer", roles: "tua", group: "Support" },
@@ -57,10 +57,10 @@ export const NAV = [
 export const ROLES = ["Admin", "Tier 1 Agent", "Tier 2 Agent", "Student", "Faculty"];
 export const RL = ["Student", "Faculty", "Tier 1", "Tier 2", "Admin"];
 export const PF = ["Submit ticket", "View own tickets", "View all tickets", "Change priority", "AI Agent-Assist", "RPA management", "User management", "Audit logs"];
-export const PERM0 = [[1,1,1,1,1],[1,1,1,1,1],[0,0,1,1,1],[0,0,1,1,1],[0,0,1,1,1],[0,0,0,1,1],[0,0,0,0,1],[0,0,0,1,1]];
+export const PERM0 = [[1,1,0,0,0],[1,1,0,0,0],[0,0,1,1,1],[0,0,1,1,1],[0,0,1,1,1],[0,0,0,1,1],[0,0,0,0,1],[0,0,0,1,1]];
 export const USERS = [
   ["Gina Reyes", "g••••••@student.edu", "Student", "Active", "2m ago"],
-  ["PROF. M. Chups", "m•••@faculty.edu", "Faculty", "Active", "1h ago"],
+  ["Prof. D. Lim", "m•••@faculty.edu", "Faculty", "Active", "1h ago"],
   ["Marco Santos", "m••••••@campus.edu", "Tier 1 Agent", "Active", "now"],
   ["Rafael Cruz", "r•••••@campus.edu", "Tier 2 Agent", "Active", "12m ago"],
   ["Ana Lopez", "a•••@campus.edu", "Admin", "Active", "5m ago"],

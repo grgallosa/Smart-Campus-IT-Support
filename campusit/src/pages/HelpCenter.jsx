@@ -7,16 +7,16 @@ import { Section } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CHIPS, TOPICS } from "@/lib/data";
-import { useApp } from "@/store";
+import { ownsTicket, useApp } from "@/store";
 import { cn } from "@/lib/utils";
 
 /** Tier 0 Help Center: search → AI chat (ticket form inside) → my tickets → popular topics. */
 export default function HelpCenter() {
-  const { gq, tickets } = useApp();
+  const { gq, tickets, role } = useApp();
   const [q, setQ] = useState(gq), [cat, setCat] = useState(""), [seed, setSeed] = useState(null);
   useEffect(() => setQ(gq), [gq]);
   const list = TOPICS.filter((t) => (!cat || t.chip === cat) && (!q || (t.title + t.body + t.chip).toLowerCase().includes(q.toLowerCase())));
-  const mine = tickets.filter((t) => t.who === "G. Reyes").slice(0, 4);
+  const mine = tickets.filter((t) => ownsTicket(role, t)).slice(0, 4);
   return (
     <>
       <div className="py-6 text-center">

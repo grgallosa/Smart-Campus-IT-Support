@@ -118,7 +118,7 @@ export default function QrReport() {
         <Section title="Report submitted"><Body className="gap-3">
           <div className="flex items-center gap-2 text-ok"><CheckCircle2 className="size-5" /><b>Ticket {created.id} created and sent to the IT work queue.</b></div>
           <p>Asset: <b>{created.assetId}</b> · Location: <b>{created.loc}</b> · Priority: <b>P{created.p}</b> · Team: <b>{created.tier}</b></p>
-          <p className="text-mu">The administrator receives a new-ticket notification through the existing in-memory workflow. Switch the demo role to Tier 1 or Tier 2 to inspect it.</p>
+          <p className="text-mu">The administrator receives a new-ticket notification through the existing in-memory workflow. Sign out and sign in as Tier 1 or Tier 2 to inspect it.</p>
           <div className="flex flex-wrap gap-2"><Button variant="primary" onClick={() => nav(`/tickets/${created.id}`)}>Track ticket progress</Button><Button onClick={() => { setCreated(null); setSubject(""); setDesc(""); setQuickFixes(false); setTriedFixes(false); }}>Report another issue</Button></div>
         </Body></Section>
       ) : (
