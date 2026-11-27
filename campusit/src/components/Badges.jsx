@@ -8,7 +8,7 @@ export const Chip = ({ c, children, className }) => (
   </span>
 );
 export const PriorityBadge = ({ p, short }) => <Chip c={PC[p]}>{short ? `P${p}` : `P${p} · ${PL[p]}`}</Chip>;
-const SC = { Resolved: "#16A34A", Escalated: "#D97706", New: "#A1A1AA", Open: "#A1A1AA", Submitted: "#A1A1AA" };
+const SC = { Resolved: "#16A34A", Closed: "#71717A", Escalated: "#D97706", New: "#A1A1AA", Open: "#A1A1AA", Submitted: "#A1A1AA" };
 export const StatusBadge = ({ s }) => <Chip c={SC[s] || "#2563EB"}>{s}</Chip>;
 /** AI content is always labelled and uses the brand blue. */
 export const AiBadge = ({ children = "AI" }) => (

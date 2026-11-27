@@ -11,16 +11,18 @@ npm run build      # production build in dist/
 ```
 
 ## Demo flow
-1. **Student** (default role): Help Center → chat "I can't connect to campus Wi-Fi" → *Still not working* → ticket form → ticket created.
-2. Switch **Demo role** (top bar) to **Tier 1 Agent** → Agent Workspace → open CIT-2026-1042 → apply the AI re-rating (impact → P2, routes to Tier 2).
-3. Switch to **Tier 2 Agent** → *Trigger RPA bot* → run the simulation → *Resolve & close*.
-4. Switch back to **Student** → My Tickets to see the resolved status. **Admin** sees Users & Roles, Security, Analytics.
+1. **Student**: Help Center → chat "I can't connect to campus Wi-Fi" → *Still not working* → fill the form → ticket created in the **Tier 1 queue**, priority is *requester-suggested*.
+2. **Tier 1 Agent**: Agent Workspace → open the new ticket → *Claim ticket* → *Confirm P#* (P1/P2 escalates to Tier 2). Or open CIT-2026-1042 → *Apply* the AI re-rating (impact → P2, escalates to Tier 2).
+3. **Tier 1 Agent**: open CIT-2026-1039 (password reset) → *Claim* → *Trigger password-reset bot* → *Approve & run* (try *Simulate identity mismatch* for the failure path) → back on the ticket: *ACW summary (1-click)* → *Save* → *Resolve & close*.
+4. **Tier 2 Agent**: sees only Tier 2 tickets (e.g. 1038, 1035, escalated 1042) → *Claim* → act → resolve. *Reveal* masked PII needs a typed reason (audit-logged).
+5. **Student** → My Tickets → open the resolved ticket → *Yes, close ticket* (or *No, reopen*).
+6. **Admin**: read-only on tickets; Users & Roles (toggle a permission and watch access change), Security, RAID & AI Disclosure. Open `/#/security` as Student to see a logged denial.
 
 ## Workflow rules (src/lib/data.js)
 - Priority = Impact × Urgency (`MX`), P1–P4. P1/P2 route to Tier 2, P3/P4 to Tier 1.
 - SLA targets: P1 15 min / 4 h · P2 30 min / 8 h · P3 2 h / 24 h · P4 8 h / 3 days (`RT`, `TOT`).
-- Re-rating restarts the SLA from ticket creation. Escalation changes ownership, never priority.
-- P3/P4 "business hours" is a label only; timers count in calendar time.
+- Re-rating restarts the SLA from ticket creation. Escalation (manual, P1/P2 rule or triage) always lands in the Tier 2 queue with status Escalated; priority never changes. Agents act only on tickets in their tier that they have claimed; Admin is read-only. Lifecycle ends Resolved → Closed when the requester confirms.
+- SLA timers count calendar time (24×7) for every priority. At risk = under 25% of the target time left; a breach flags the ticket for escalation.
 - AI suggests, the agent decides: Accept / Edit / Ignore. Nothing is sent automatically.
 
 ## Structure
