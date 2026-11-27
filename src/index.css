@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neutral first. Blue = interaction + brand. Green/amber/red = status only. */
+:root {
+  --bg:#FFFFFF; --sbg:#F7F7F8; --sf:#FFFFFF; --b2:#F7F7F8;
+  --tx:#18181B; --mu:#71717A; --mt:#A1A1AA; --bd:#E4E4E7; --bd2:#D4D4D8;
+  --ac:#2563EB; --ach:#1D4ED8; --acx:#2563EB; --acs:#EFF6FF; --btt:#FFFFFF;
+  --okt:#15803D; --wrt:#B45309; --ert:#B91C1C;
+  color-scheme: light;
+}
+.dark {
+  --bg:#18181B; --sbg:#1F1F23; --sf:#242428; --b2:#2A2A2F;
+  --tx:#F4F4F5; --mu:#A1A1AA; --mt:#71717A; --bd:#35353A; --bd2:#45454B;
+  --ac:#3B82F6; --ach:#60A5FA; --acx:#60A5FA; --acs:#1E293B; --btt:#0A0A0A;
+  --okt:#22C55E; --wrt:#F59E0B; --ert:#F87171;
+  color-scheme: dark;
+}
+@layer base {
+  body { @apply bg-bg font-sans text-[13px] text-tx antialiased; }
+  * { @apply border-bd; }
+  h1 { @apply text-2xl font-semibold tracking-tight; }
+}
+@layer components {
+  .tbl { @apply w-full border-collapse text-[12.5px]; }
+  .tbl th { @apply whitespace-nowrap bg-b2 px-3 py-1.5 text-left text-xs font-medium text-mu; }
+  .tbl td { @apply whitespace-nowrap border-t border-bd px-3 py-1.5; }
+  .tbl tbody tr:hover td { @apply bg-b2; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
