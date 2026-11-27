@@ -12,8 +12,8 @@ export default function UsersRoles() {
       <div><h1>Users & Roles</h1><p className="text-mu">Manage who can do what. Every change is written to the audit log.</p></div>
       <Section title="Permissions">
         <div className="overflow-x-auto"><table className="tbl"><thead><tr><th>Permission</th>{RL.map((r) => <th key={r}>{r}</th>)}</tr></thead>
-          <tbody>{PF.map((f, i) => <tr key={f}><td>{f}</td>{RL.map((r, j) => <td key={r}><Switch checked={!!perm[i][j]} disabled={j === 4 && i >= 6} onCheckedChange={() => togglePerm(i, j)} aria-label={`${f}: ${r}`} /></td>)}</tr>)}</tbody></table></div>
-        <p className="px-4 py-2 text-xs text-mu">Prototype: toggles are logged but do not change live access.</p>
+          <tbody>{PF.map((f, i) => <tr key={f}><td>{f}</td>{RL.map((r, j) => <td key={r}><Switch checked={!!perm[i][j]} disabled={j === 3 && (i === 6 || i === 7)} onCheckedChange={() => togglePerm(i, j)} aria-label={`${f}: ${r}`} /></td>)}</tr>)}</tbody></table></div>
+        <p className="px-4 py-2 text-xs text-mu">Changes apply immediately to the demo roles. Every change is audit-logged.</p>
       </Section>
       <Section title="Users">
         <div className="overflow-x-auto"><table className="tbl"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last active</th></tr></thead>

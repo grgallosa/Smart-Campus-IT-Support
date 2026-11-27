@@ -14,13 +14,13 @@ const SUGGEST = ["I can’t connect to campus Wi-Fi.", "Reset my password", "Pri
 
 /** Tier 0: give the fix straight away → "Yes, resolved" or "Still not working" → ticket form in the chat. */
 export default function ChatAssistant({ seed }) {
-  const { createTicket } = useApp();
+  const { createTicket, deflect } = useApp();
   const [chat, setChat] = useState([]), [out, setOut] = useState(""), [draft, setDraft] = useState(""), [done, setDone] = useState(null), [text, setText] = useState("");
 
   const ask = (t) => {
     const m = SOL.find((x) => x.re.test(t));
     setDone(null); setDraft(t.length < 60 ? t : "");
-    setChat((c) => [...c, { r: "u", t }, m ? { r: "a", steps: m.steps, fix: true } : { r: "a", t: "I couldn’t find a confident answer for that." }]);
+    setChat((c) => [...c, { r: "u", t }, m ? { r: "a", steps: m.steps, fix: true, kb: m.kb } : { r: "a", t: "I couldn’t find a confident answer for that." }]);
     setOut(m ? "" : "esc");
   };
   useEffect(() => { if (seed?.text) ask(seed.text); }, [seed]); // eslint-disable-line
@@ -34,10 +34,10 @@ export default function ChatAssistant({ seed }) {
         {chat.map((m, i) => (
           <div key={i} className={cn("max-w-xl rounded-xl px-3 py-2", m.r === "u" ? "self-end bg-ac text-btt" : "self-start bg-b2")}>
             {m.t}
-            {m.steps && <><p>Here’s a quick fix:</p><ol className="ml-4 list-decimal">{m.steps.map((s) => <li key={s}>{s}</li>)}</ol><p className="mt-2">Did that fix it?</p></>}
+            {m.steps && <><p>Here’s a quick fix:</p><ol className="ml-4 list-decimal">{m.steps.map((s) => <li key={s}>{s}</li>)}</ol><p className="mt-2 text-xs text-mu">Source: Knowledge Base · {m.kb}</p><p className="mt-1">Did that fix it?</p></>}
             {m.fix && i === chat.length - 1 && !out && (
               <div className="mt-2 flex gap-2">
-                <Button size="sm" variant="primary" onClick={() => pick("Yes, resolved", "ok")}>Yes, resolved</Button>
+                <Button size="sm" variant="primary" onClick={() => { pick("Yes, resolved", "ok"); deflect(); }}>Yes, resolved</Button>
                 <Button size="sm" onClick={() => pick("Still not working", "esc")}>Still not working</Button>
               </div>
             )}
@@ -50,7 +50,7 @@ export default function ChatAssistant({ seed }) {
             <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
               <div><div className="text-xs text-mu">Priority</div><PriorityBadge p={done.p} /></div>
               <div><div className="text-xs text-mu">Status</div><StatusBadge s={done.st} /></div>
-              <div><div className="text-xs text-mu">SLA target</div><Sla end={done.end} /></div>
+              <div><div className="text-xs text-mu">SLA target</div><Sla end={done.end} total={done.tot} /></div>
               <div><div className="text-xs text-mu">Assigned</div><b>{done.tier} Support</b></div>
               <div><div className="text-xs text-mu">Est. response</div><b>{["", "15 min", "30 min", "2 hours", "8 hours"][done.p]}</b></div>
             </div>

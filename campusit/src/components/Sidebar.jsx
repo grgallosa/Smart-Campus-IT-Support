@@ -8,8 +8,8 @@ const ICONS = { BarChart3, Bot, Headset, LifeBuoy, ShieldCheck, Timer, Ticket, U
 
 /** Role-based sidebar: items a role can't use are hidden, not locked. Drawer on mobile, rail when collapsed. */
 export default function Sidebar({ open, collapsed, onClose }) {
-  const { role } = useApp();
-  const items = NAV.filter((n) => n.roles.includes(role));
+  const { role, can } = useApp();
+  const items = NAV.filter((n) => n.roles.includes(role) && can(n.f));
   let prev;
   return (
     <nav aria-label="Main" className={cn(

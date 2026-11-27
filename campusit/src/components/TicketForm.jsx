@@ -6,7 +6,7 @@ import { CATS, HOW, IMP, MX, URG, WHO } from "@/lib/data";
 
 /** Ticket form shown inside the Tier 0 chat. Priority = Impact × Urgency, with the routing tier previewed. */
 export default function TicketForm({ draft, tried, onSubmit }) {
-  const [f, setF] = useState({ cat: CATS[0], loc: "", imp: "2", urg: "0", subject: draft, desc: tried ? "Already tried the AI troubleshooting steps without success." : "", dev: "" });
+  const [f, setF] = useState({ cat: CATS[0], loc: "", imp: "2", urg: "0", subject: draft, desc: tried ? "Already tried the AI troubleshooting steps without success." : "", dev: "", att: "" });
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   const p = MX[+f.imp][+f.urg];
   return (
@@ -22,12 +22,12 @@ export default function TicketForm({ draft, tried, onSubmit }) {
       <Field label="Description"><Textarea rows={2} value={f.desc} onChange={set("desc")} /></Field>
       <div className="grid gap-2 sm:grid-cols-2">
         <Field label="Device"><Input value={f.dev} onChange={set("dev")} placeholder="Windows laptop" /></Field>
-        <Field label="Attachment"><Input type="file" className="px-2 py-1" /></Field>
+        <Field label="Attachment"><Input type="file" className="px-2 py-1" onChange={(e) => setF({ ...f, att: e.target.files?.[0]?.name || "" })} /></Field>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <PriorityBadge p={p} />
-          <span className="text-xs text-mu">{IMP[+f.imp]} impact × {URG[+f.urg]} urgency · routes to {p < 3 ? "Tier 2" : "Tier 1"}</span>
+          <span className="text-xs text-mu">{IMP[+f.imp]} impact × {URG[+f.urg]} urgency · Tier 1 verifies this priority first</span>
         </div>
         <Button variant="primary" onClick={() => onSubmit({ ...f, imp: +f.imp, urg: +f.urg })}>Submit ticket</Button>
       </div>
