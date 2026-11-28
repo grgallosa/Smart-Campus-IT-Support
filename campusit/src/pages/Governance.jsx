@@ -6,7 +6,7 @@ const RAID = [
   ["Risk", "Bot resets the wrong account", "Low / High", "RPA Lead", "ID + phone check, agent approval, bot stops on mismatch", "Mitigated"],
   ["Risk", "PII exposed to Tier 1 or in AI prompts", "Medium / High", "Compliance Auditor", "Fields masked by default; Tier 2 reveal needs a reason and is audited; mask before AI use", "Mitigated"],
   ["Risk", "Requester overstates impact to jump the queue", "Medium / Medium", "Project Manager", "Agent verifies and can re-rate; re-rate is logged and SLA recalculated", "Open"],
-  ["Risk", "P1/P2 SLA breach", "Low / High", "Project Manager", "24×7 clocks, amber alert at 30 min, breach flagged as an escalation criterion", "Mitigated"],
+  ["Risk", "P1/P2 SLA breach", "Low / High", "Project Manager", "24×7 clocks, amber “At risk” alert when under 25% of the target time is left, breach flagged as an escalation criterion", "Mitigated"],
   ["Assumption", "Campus directory exposes a scoped password-reset API", "n/a", "RPA Lead", "Validate with campus IT before go-live", "Open"],
   ["Assumption", "Students have a registered phone number on file", "n/a", "Compliance Auditor", "Fallback: bot stops and agent verifies manually", "Open"],
   ["Assumption", "KB articles are kept current by IT staff", "n/a", "Project Manager", "Review owner and date on each article", "Open"],
